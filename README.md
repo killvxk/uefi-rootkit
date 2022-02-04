@@ -88,12 +88,16 @@ The first open source UEFI implementation, Tiano, was released by Intel in 2004.
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/2_uefi_driver_implementation_checklist/22_how_to_implement_features_in_edk_ii
 - https://stackoverflow.com/questions/63725239/build-edk2-in-linux
 - https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-Writing-Simple-Application
+- https://edk2-docs.gitbook.io/edk-ii-build-specification/
 # Testing
 - https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-with-EDK-II
 - https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions
 - https://github.com/tianocore/tianocore.github.io/wiki/How-to-build-OVMF
 - https://stackoverflow.com/questions/63725239/build-edk2-in-linux
-- `qemu-system-x86_64 --bios path/to/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd -net none -hda fat:rw:hda-contents`
+- export WORKSPACE=~/repos/uefi-rootkit
+- export PACKAGES_PATH=~/repos/uefi-rootkit/src/bootloader:~/repos/uefi-rootkit/src/driver:~/repos/edk2
+- export EDK_TOOLS_BIN=~/repos/edk2/BaseTools
+- `qemu-system-x86_64 --bios ~/repos/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd -net none -hda fat:rw:/home/powware/repos/uefi-rootkit/build/DEBUG_GCC5/X64/src/bootloader/bootloader/DEBUG`
 
 # Sources
 - https://docs.microsoft.com/en-us/windows/security/information-protection/secure-the-windows-10-boot-process
