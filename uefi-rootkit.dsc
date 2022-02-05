@@ -201,9 +201,8 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdRecoveryFileName|L"FVMAIN.FV"
 
 [Components]
-  src/bootloader/bootloader.inf
-  MdeModulePkg/Application/DumpDynPcd/DumpDynPcd.inf
-  MdeModulePkg/Application/MemoryProfileInfo/MemoryProfileInfo.inf
+  src/application/application.inf
+  src/rootkit/rootkit.inf
 
   MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
   MdeModulePkg/Logo/Logo.inf

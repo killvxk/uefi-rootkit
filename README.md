@@ -95,9 +95,9 @@ The first open source UEFI implementation, Tiano, was released by Intel in 2004.
 - https://github.com/tianocore/tianocore.github.io/wiki/How-to-build-OVMF
 - https://stackoverflow.com/questions/63725239/build-edk2-in-linux
 - export WORKSPACE=~/repos/uefi-rootkit
-- export PACKAGES_PATH=~/repos/uefi-rootkit/src/bootloader:~/repos/uefi-rootkit/src/driver:~/repos/edk2
+- export PACKAGES_PATH=~/repos/uefi-rootkit/src/application:~/repos/uefi-rootkit/src/rootkit:~/repos/edk2
 - export EDK_TOOLS_BIN=~/repos/edk2/BaseTools
-- `qemu-system-x86_64 --bios ~/repos/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd -net none -hda fat:rw:/home/powware/repos/uefi-rootkit/build/DEBUG_GCC5/X64/src/bootloader/bootloader/DEBUG`
+- `qemu-system-x86_64 --bios ~/repos/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd -net none -hda fat:rw:/home/powware/repos/uefi-rootkit/build/DEBUG_GCC5/X64/src/application/application/DEBUG`
 
 # Sources
 - https://docs.microsoft.com/en-us/windows/security/information-protection/secure-the-windows-10-boot-process
@@ -128,3 +128,4 @@ The first open source UEFI implementation, Tiano, was released by Intel in 2004.
 # Writer Guide Broken:
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/34_handle_database
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/readme.8
+- https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/appendix_b_edk_ii_sample_drivers
