@@ -29,7 +29,7 @@ EFI_EVENT gVirtualAddressChangeEvent = NULL;
 
 UINT32 gData = 0;
 
-EFI_STATUS EFIAPI DriverEntryPoint(
+EFI_STATUS EFIAPI RootkitEntryPoint(
     IN EFI_HANDLE ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable)
 {

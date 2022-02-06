@@ -1,4 +1,4 @@
-ACTIVE_PLATFORM       = uefi-rootkit.dsc
+ACTIVE_PLATFORM       = src/UefiRootkitPkg/UefiRootkitPkg.dsc
 TARGET                = DEBUG
 TARGET_ARCH           = X64
 TOOL_CHAIN_CONF       = Conf/tools_def.txt

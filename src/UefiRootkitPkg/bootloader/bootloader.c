@@ -6,7 +6,7 @@ UINT32 GetData() { return 1; }
 
 EFI_STATUS
 EFIAPI
-ApplicationEntryPoint(
+BootloaderEntryPoint(
     IN EFI_HANDLE ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable)
 {

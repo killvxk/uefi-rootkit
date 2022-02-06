@@ -1,0 +1,8 @@
+[Defines]
+DEC_SPECIFICATION = 0x00010005
+PACKAGE_NAME      = UefiRootkitPkg
+PACKAGE_GUID      = f9098471-69ff-4aaa-a2a2-8e08f5f74858
+PACKAGE_VERSION   = 1.0
+
+[Includes]
+Include
