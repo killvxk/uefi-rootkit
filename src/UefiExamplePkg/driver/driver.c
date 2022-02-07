@@ -1,4 +1,4 @@
-#include "rootkit.h"
+#include "driver.h"
 
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -22,15 +22,15 @@ BOOLEAN gRuntime = FALSE;
 EFI_EVENT gExitBootServicesEvent = NULL;
 EFI_EVENT gVirtualAddressChangeEvent = NULL;
 
-EFI_ANSWER_PROTOCOL gRootkitAnswer = {GetAnswer};
+EFI_ANSWER_PROTOCOL gAnswer = {GetAnswer};
 
 EFI_STATUS EFIAPI
-RootkitEntryPoint(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
+DriverEntryPoint(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 {
     EFI_STATUS status;
     status = gBS->InstallMultipleProtocolInterfaces(&ImageHandle,
-                                                    &gEfiComponentName2ProtocolGuid, &gRootkitComponentName2,
-                                                    &gEfiAnswerProtocolGuid, &gRootkitAnswer,
+                                                    &gEfiComponentName2ProtocolGuid, &gComponentName2,
+                                                    &gEfiAnswerProtocolGuid, &gAnswer,
                                                     NULL);
     if (EFI_ERROR(status))
     {

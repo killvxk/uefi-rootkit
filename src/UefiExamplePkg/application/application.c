@@ -16,7 +16,7 @@ BootloaderEntryPoint(
     EFI_STATUS status = gBS->LocateHandleBuffer(ByProtocol, &gEfiAnswerProtocolGuid, NULL, &handle_count, &handles);
     if (EFI_ERROR(status) || handle_count == 0)
     {
-        Print(L"Nobodoy can give an awnser.\n");
+        Print(L"Nobodoy can give an answer.\n");
         return status;
     }
 
@@ -36,7 +36,7 @@ BootloaderEntryPoint(
             continue;
         }
 
-        Print(L"The answer is: %u\n", answer);
+        Print(L"The answer is: %u.\n", answer);
 
         goto cleanup;
     }

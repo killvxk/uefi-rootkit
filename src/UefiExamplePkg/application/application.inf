@@ -1,6 +1,6 @@
 [Defines]
 INF_VERSION                 = 1.25
-BASE_NAME                   = bootloader
+BASE_NAME                   = Application
 FILE_GUID                   = 88fb4a67-8f31-4135-a2db-cd9cf5c89997
 MODULE_TYPE                 = UEFI_APPLICATION
 VERSION_STRING              = 1.0
@@ -8,11 +8,11 @@ ENTRY_POINT                 = BootloaderEntryPoint
 VALID_ARCHITECTURES         = X64
 
 [Sources]
-bootloader.c
+application.c
 
 [Packages]
 MdePkg/MdePkg.dec
-UefiRootkitPkg/UefiRootkitPkg.dec
+UefiExamplePkg/UefiExamplePkg.dec
 
 [LibraryClasses]
 UefiLib

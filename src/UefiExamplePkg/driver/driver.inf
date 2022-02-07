@@ -1,19 +1,19 @@
 [Defines]
 INF_VERSION                 = 1.25
-BASE_NAME                   = rootkit
+BASE_NAME                   = Driver
 FILE_GUID                   = 3150d392-91c9-4dee-9e79-6412592d2c3a
 MODULE_TYPE                 = DXE_RUNTIME_DRIVER
 VERSION_STRING              = 1.0
-ENTRY_POINT                 = RootkitEntryPoint
+ENTRY_POINT                 = DriverEntryPoint
 VALID_ARCHITECTURES         = X64
 
 [Sources]
 component_name.c
-rootkit.c
+driver.c
 
 [Packages]
 MdePkg/MdePkg.dec
-UefiRootkitPkg/UefiRootkitPkg.dec
+UefiExamplePkg/UefiExamplePkg.dec
 
 [LibraryClasses]
 DebugLib
