@@ -89,16 +89,52 @@ The first open source UEFI implementation, Tiano, was released by Intel in 2004.
 - https://stackoverflow.com/questions/63725239/build-edk2-in-linux
 - https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-Writing-Simple-Application
 - https://edk2-docs.gitbook.io/edk-ii-build-specification/
-# Testing
-- https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-with-EDK-II
-- https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions
-- https://github.com/tianocore/tianocore.github.io/wiki/How-to-build-OVMF
-- https://stackoverflow.com/questions/63725239/build-edk2-in-linux
-- `export WORKSPACE=~/repos/uefi-rootkit`
-- `export PACKAGES_PATH=~/repos/uefi-rootkit/src/UefiRootkitPkg:~/repos/edk2`
-- `export EDK_TOOLS_BIN=~/repos/edk2/BaseTools`
-- `build -p src/UefiRootkitPkg/UefiRootkitPkg.dsc`
-- `qemu-system-x86_64 --bios ~/repos/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd -net none -hda fat:rw:/home/powware/repos/uefi-rootkit/build/DEBUG_GCC5/X64`
+
+## UefiExamplePkg
+This is a simple EDK II package consiting of an application, a driver and a protocol. It serves as a first introductory exercise to UEFI programming. The driver implements and installs a protocol called `Answer` which the application then can search for. If the application is able to find an instance of the protocol the protocol function `GetAnswer` is called and it's output is printed to console. If the application is not able to find an instance it will print that to the console. In both cases the application terminates and can be launched to try again.
+
+
+# How to Build
+## Setting up EDK II
+Follow [Getting Started with EDK II](https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-with-EDK-II#how-to-setup-a-local-edk-ii-tree) by selecting the appropriate guide for your build environment. Stop at [Setup build shell environment](https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions#setup-build-shell-environment) in the [common instructions](https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions).
+
+Clone this repository:
+```
+git clone https://github.com/powware/uefi-rootkit.git
+```
+
+Now set the following environment variables:
+- `WORKSPACE` to the cloned repository (e.g. `export WORKSPACE=~/repos/uefi-rootkit`)
+- `PACKAGES_PATH` to the `src` folder of this repository as well as the edk2 repository (e.g. `export PACKAGES_PATH=~/repos/uefi-rootkit/src/:~/repos/edk2`)
+
+Change directory so you are in the root of this repository and create an empty folder called `Conf` (e.g. `mkdir Conf`). Then call the edksetup script (e.g. `. edksetup.sh`), this will copy template configuration files. In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered GCC5 to use my gcc 11.2.0 installtion.
+
+## Building UefiExamplePkg
+To build this package have EDK II setup with all the needed environment variables and enter:
+```
+build -p src/UefiRootkitPkg/UefiRootkitPkg.dsc
+```
+
+# Usage
+
+## Getting OVMF
+https://github.com/tianocore/tianocore.github.io/wiki/How-to-run-OVMF
+
+## UEFI Shell
+
+## Running UefiExmaplePkg
+Using QEMU and the UEFI emulation firmware you need to enter (make sure to use an absolute path with the `-hda` option):
+```
+qemu-system-x86_64 --bios <path to>/OVMF.fd -net none -hda fat:rw:<absolute path to>/uefi-rootkit/build/<tool chain>/X64
+```
+
+You should now see the UEFI shell and load the driver and run the application like this:
+```
+fs0:
+load Driver.efi
+.\Application.efi
+```
+
 
 # Sources
 - https://docs.microsoft.com/en-us/windows/security/information-protection/secure-the-windows-10-boot-process

@@ -1,3 +1,0 @@
-Arch=X64
-BuildDir=/home/powware/repos/uefi-rootkit/build/DEBUG_GCC5
-PlatformGuid=af49bc4a-daa0-4348-92bb-9bdb7cf86c22
