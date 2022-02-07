@@ -117,7 +117,7 @@ build -p src/UefiRootkitPkg/UefiRootkitPkg.dsc
 
 # Usage
 
-## Getting an OVMF image
+## Obtaining an OVMF image
 You will need a UEFI firmware image for QEMU emulation. You can either [build one yourself](https://github.com/tianocore/tianocore.github.io/wiki/How-to-build-OVMF) from the EDK II repository or download precompiled images [here](https://www.kraxel.org/repos/) or install the `ovmf` apt repository.
 
 <!--
