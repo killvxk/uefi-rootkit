@@ -115,7 +115,7 @@ and run this script:
 . edksetup.sh
 ```
 
-_Note: Every new session requires the environment variables to be set and the script to be run._
+_**Note**: Every new session requires the environment variables to be set and the script to be run._
 
 
 In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered `GCC5` to use my gcc 11.2.0 installation.
@@ -149,14 +149,14 @@ No you can launch the application:
 ```
 .\Application.efi
 ```
-The application will not find an instance of the protocol it wants to access.
+The application was not able to find an instance of the protocol it wanted to access and is unable to print an answer.
 
-Start the driver and launch the application again:
+Start the driver first and then launch the application this time:
 ```
 load Driver.efi
 .\Application.efi
 ```
-The driver installed an instance of the protocol the application was searching for and now it was able to call a function from the protocol.
+Loading the driver before launching the application allows the driver to install an instance of the protocol. The application was now able to find a protocol instance and could call the offered function to print an answer.
 
 That's it!
 
