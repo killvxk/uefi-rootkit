@@ -13,6 +13,7 @@ rootkit.c
 
 [Packages]
 MdePkg/MdePkg.dec
+UefiRootkitPkg/UefiRootkitPkg.dec
 
 [LibraryClasses]
 DebugLib
@@ -21,6 +22,9 @@ UefiLib
 UefiBootServicesTableLib
 UefiRuntimeServicesTableLib
 UefiRuntimeLib
+
+[Protocols]
+gEfiAnswerProtocolGuid
 
 [Depex]
 gEfiBdsArchProtocolGuid               AND

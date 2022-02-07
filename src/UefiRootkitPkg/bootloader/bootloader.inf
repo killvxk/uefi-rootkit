@@ -12,17 +12,12 @@ bootloader.c
 
 [Packages]
 MdePkg/MdePkg.dec
+UefiRootkitPkg/UefiRootkitPkg.dec
 
 [LibraryClasses]
 UefiLib
 UefiApplicationEntryPoint
 
-[Guids]
-
-[Ppis]
-
 [Protocols]
+gEfiAnswerProtocolGuid
 
-[FeaturePcd]
-
-[Pcd]

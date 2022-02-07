@@ -4,44 +4,38 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiRuntimeLib.h>
-#include <Protocol/DriverBinding.h>
+
+#include <Protocol/Answer.h>
+
+// Constants
+const UINT32 kAnswer = 42;
 
 // Declarations
-EFI_STATUS EFIAPI RootkitDriverBindingSupported(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL);
-EFI_STATUS EFIAPI RootkitDriverBindingStart(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL);
-EFI_STATUS EFIAPI RootkitDriverBindingStop(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN UINTN NumberOfChildren, IN EFI_HANDLE *ChildHandleBuffer OPTIONAL);
 VOID EFIAPI NotifyExitBootServices(IN EFI_EVENT Event, IN VOID *Context);
 VOID EFIAPI NotifySetVirtualAddressMap(IN EFI_EVENT Event, IN VOID *Context);
 
-// Global Data
-EFI_DRIVER_BINDING_PROTOCOL gRootkitDriverBinding = {
-    RootkitDriverBindingSupported,
-    RootkitDriverBindingStart,
-    RootkitDriverBindingStop,
-    ROORKIT_VERSION,
-    NULL,
-    NULL};
+EFI_STATUS EFIAPI GetAnswer(IN EFI_ANSWER_PROTOCOL *This, OUT UINT32 *data);
 
+// Global Data
 BOOLEAN gRuntime = FALSE;
 
 EFI_EVENT gExitBootServicesEvent = NULL;
 EFI_EVENT gVirtualAddressChangeEvent = NULL;
 
-UINT32 gData = 0;
+EFI_ANSWER_PROTOCOL gRootkitAnswer = {GetAnswer};
 
-EFI_STATUS EFIAPI RootkitEntryPoint(
-    IN EFI_HANDLE ImageHandle,
-    IN EFI_SYSTEM_TABLE *SystemTable)
+EFI_STATUS EFIAPI
+RootkitEntryPoint(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 {
     EFI_STATUS status;
-    status = EfiLibInstallDriverBindingComponentName2(
-        ImageHandle,
-        SystemTable,
-        &gRootkitDriverBinding,
-        ImageHandle,
-        &gRootkitComponentName,
-        &gRootkitComponentName2);
-    ASSERT_EFI_ERROR(status);
+    status = gBS->InstallMultipleProtocolInterfaces(&ImageHandle,
+                                                    &gEfiComponentName2ProtocolGuid, &gRootkitComponentName2,
+                                                    &gEfiAnswerProtocolGuid, &gRootkitAnswer,
+                                                    NULL);
+    if (EFI_ERROR(status))
+    {
+        return status;
+    }
 
     status = gBS->CreateEvent(
         EVT_SIGNAL_EXIT_BOOT_SERVICES,
@@ -49,7 +43,10 @@ EFI_STATUS EFIAPI RootkitEntryPoint(
         NotifyExitBootServices,
         NULL,
         &gExitBootServicesEvent);
-    ASSERT_EFI_ERROR(status);
+    if (EFI_ERROR(status))
+    {
+        return status;
+    }
 
     status = gBS->CreateEvent(
         EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
@@ -57,31 +54,18 @@ EFI_STATUS EFIAPI RootkitEntryPoint(
         NotifySetVirtualAddressMap,
         NULL,
         &gVirtualAddressChangeEvent);
-    ASSERT_EFI_ERROR(status);
+    if (EFI_ERROR(status))
+    {
+        return status;
+    }
 
     return status;
 }
 
-EFI_STATUS EFIAPI RootkitDriverBindingSupported(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL)
+EFI_STATUS EFIAPI GetAnswer(IN EFI_ANSWER_PROTOCOL *This, OUT UINT32 *data)
 {
+    *data = kAnswer;
     return EFI_SUCCESS;
-}
-
-EFI_STATUS EFIAPI RootkitDriverBindingStart(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL)
-{
-    gData = 42;
-    return EFI_SUCCESS;
-}
-
-EFI_STATUS EFIAPI RootkitDriverBindingStop(IN EFI_DRIVER_BINDING_PROTOCOL *This, IN EFI_HANDLE ControllerHandle, IN UINTN NumberOfChildren, IN EFI_HANDLE *ChildHandleBuffer OPTIONAL)
-{
-    gData = 0;
-    return EFI_SUCCESS;
-}
-
-UINT32 RootkitProtocolGetData()
-{
-    return gData;
 }
 
 VOID EFIAPI NotifyExitBootServices(IN EFI_EVENT Event, IN VOID *Context)

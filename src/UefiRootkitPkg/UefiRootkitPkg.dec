@@ -5,4 +5,7 @@ PACKAGE_GUID      = f9098471-69ff-4aaa-a2a2-8e08f5f74858
 PACKAGE_VERSION   = 1.0
 
 [Includes]
-Include
+include
+
+[Protocols]
+gEfiAnswerProtocolGuid = { 0x2c2c69ed, 0xe8f9, 0x4f7f, { 0xba, 0xda, 0x75, 0xfb, 0x30, 0x25, 0xce, 0x1f } }
