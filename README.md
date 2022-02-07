@@ -98,16 +98,27 @@ This is a simple EDK II package consiting of an application, a driver and a prot
 ## Setting up EDK II
 Follow [Getting Started with EDK II](https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-with-EDK-II#how-to-setup-a-local-edk-ii-tree) by selecting the appropriate guide for your build environment. Stop at [Setup build shell environment](https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions#setup-build-shell-environment) in the [common instructions](https://github.com/tianocore/tianocore.github.io/wiki/Common-instructions).
 
-Clone this repository:
+Clone repository and change directory:
 ```
 git clone https://github.com/powware/uefi-rootkit.git
+cd uefi-rootkit
 ```
 
 Now set the following environment variables:
 - `WORKSPACE` to the cloned repository (e.g. `export WORKSPACE=~/repos/uefi-rootkit`)
 - `PACKAGES_PATH` to the `src` folder of this repository as well as the edk2 repository (e.g. `export PACKAGES_PATH=~/repos/uefi-rootkit/src/:~/repos/edk2`)
+- Add the edk2 repository to your `PATH`
 
-Change directory so you are in the root of this repository and call the edksetup script (e.g. `. edksetup.sh`), this will copy template configuration files. In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered `GCC5` to use my gcc 11.2.0 installation.
+
+and run this script:
+```
+. edksetup.sh
+```
+
+_Note: Every new session requires the environment variables to be set and the script to be run._
+
+
+In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered `GCC5` to use my gcc 11.2.0 installation.
 
 ## Building UefiExamplePkg
 To build this package have EDK II setup with all the needed environment variables and enter:
