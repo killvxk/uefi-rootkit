@@ -107,7 +107,7 @@ Now set the following environment variables:
 - `WORKSPACE` to the cloned repository (e.g. `export WORKSPACE=~/repos/uefi-rootkit`)
 - `PACKAGES_PATH` to the `src` folder of this repository as well as the edk2 repository (e.g. `export PACKAGES_PATH=~/repos/uefi-rootkit/src/:~/repos/edk2`)
 
-Change directory so you are in the root of this repository and create an empty folder called `Conf` (e.g. `mkdir Conf`). Then call the edksetup script (e.g. `. edksetup.sh`), this will copy template configuration files. In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered GCC5 to use my gcc 11.2.0 installtion.
+Change directory so you are in the root of this repository and call the edksetup script (e.g. `. edksetup.sh`), this will copy template configuration files. In `Conf/target.txt` you need to change `TARGET_ARCH` to `X64` and `TOOL_CHAIN_TAG` to use your tool chain (`Conf/tools_def.txt` has a list of all tool chains and allows for custom definitions). I entered `GCC5` to use my gcc 11.2.0 installation.
 
 ## Building UefiExamplePkg
 To build this package have EDK II setup with all the needed environment variables and enter:
@@ -128,13 +128,24 @@ Using QEMU and the UEFI emulation firmware you need to enter (make sure to use a
 qemu-system-x86_64 --bios <path to>/OVMF.fd -net none -hda fat:rw:<absolute path to>/uefi-rootkit/build/<tool chain>/X64
 ```
 
-You should now see the UEFI shell and load the driver and run the application like this:
+You should now see the UEFI shell change to the file directory:
 ```
 fs0:
+```
+No you can launch the application:
+```
+.\Application.efi
+```
+The application will not find an instance of the protocol it wants to access.
+
+Start the driver and launch the application again:
+```
 load Driver.efi
 .\Application.efi
 ```
+The driver installed an instance of the protocol the application was searching for and now it was able to call a function from the protocol.
 
+That's it!
 
 # Sources
 - https://docs.microsoft.com/en-us/windows/security/information-protection/secure-the-windows-10-boot-process
