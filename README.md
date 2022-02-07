@@ -1,5 +1,5 @@
 # UEFI Rootkit
-Bachelor thesis about an UEFI Rookit communitcating witht the TPM module in an effort to gain trusted information from the windows boot process.
+Bachelor thesis about a UEFI Rookit communitcating witht the TPM module in an effort to gain trusted information from the windows boot process.
 
 # Current Research
 
@@ -117,10 +117,12 @@ build -p src/UefiRootkitPkg/UefiRootkitPkg.dsc
 
 # Usage
 
-## Getting OVMF
-https://github.com/tianocore/tianocore.github.io/wiki/How-to-run-OVMF
+## Getting an OVMF image
+You will need a UEFI firmware image for QEMU emulation. You can either [build one yourself](https://github.com/tianocore/tianocore.github.io/wiki/How-to-build-OVMF) from the EDK II repository or download precompiled images [here](https://www.kraxel.org/repos/) or install the `ovmf` apt repository.
 
+<!--
 ## UEFI Shell
+-->
 
 ## Running UefiExmaplePkg
 Using QEMU and the UEFI emulation firmware you need to enter (make sure to use an absolute path with the `-hda` option):
@@ -128,7 +130,7 @@ Using QEMU and the UEFI emulation firmware you need to enter (make sure to use a
 qemu-system-x86_64 --bios <path to>/OVMF.fd -net none -hda fat:rw:<absolute path to>/uefi-rootkit/build/<tool chain>/X64
 ```
 
-You should now see the UEFI shell change to the file directory:
+You should now see the UEFI shell, change to the file directory:
 ```
 fs0:
 ```
@@ -173,7 +175,9 @@ That's it!
 - https://github.com/tianocore/tianocore.github.io/wiki/EDK-II-Platforms
 - https://github.com/tianocore/tianocore.github.io/wiki/UDK
 
+<!--
 # Writer Guide Broken:
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/34_handle_database
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/readme.8
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/appendix_b_edk_ii_sample_drivers
+-->
