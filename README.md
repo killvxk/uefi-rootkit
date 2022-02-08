@@ -154,7 +154,7 @@ https://wikileaks.org/ciav7p1/cms/page_21561434.html
 
 https://github.com/tianocore/edk2
 
-The first Open source implementation of the UEFI specification.
+The first Open Source implementation of the UEFI specification.
 
 ## Project Mu
 
