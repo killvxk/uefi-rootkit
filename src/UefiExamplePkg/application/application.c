@@ -38,10 +38,9 @@ ApplicationEntryPoint(
 
         Print(L"The answer is: %u.\n", answer);
 
-        goto cleanup;
+        break;
     }
 
-cleanup:
     gBS->FreePool(handles);
 
     return status;
