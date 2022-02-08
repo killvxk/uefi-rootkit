@@ -67,7 +67,7 @@ Main differences between these types is  how and where they reside in memory. Ap
 
 ## System Table
 
-The UEFI System Table is an important dat structure, it provides access to system configuration information, boot services, runtime services and protocols.
+The UEFI System Table is an important data structure, it provides access to system configuration information, boot services, runtime services and protocols.
 
 ## Protocols
 
