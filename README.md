@@ -6,7 +6,6 @@ Bachelor thesis about a UEFI Rookit communitcating witht the TPM module in an ef
 
 <!--
 - https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface
-- https://uefi.org/sites/default/files/resources/PI_Spec_1_7_A_final_May1.pdf
 - https://uefi.org/sites/default/files/resources/UEFI_Spec_2_7.pdf
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/31_basic_programming_model
 -->
@@ -79,12 +78,240 @@ When a protocol is installed this structure is filled with pointers to function 
 
 ![](doc/images/uefi_spec_protocols.png)
 
-<!--
-## Platform initialization
+## Boot Sequence
 
+<!-- 
 - https://edk2-docs.gitbook.io/edk-ii-build-specification/2_design_discussion/23_boot_sequence
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/readme.15
+- https://uefi.org/sites/default/files/resources/ACPI_6_3_May16.pdf
+- https://www.coreboot.org/images/6/6c/LBCar.pdf
+- https://github.com/tianocore/edk2/blob/master/IntelFsp2Pkg/FspSecCore/Vtf0/Ia16/ResetVec.asm16
+- https://github.com/tianocore/edk2/blob/master/IntelFsp2WrapperPkg/Library/SecFspWrapperPlatformSecLibSample/Ia32/SecEntry.nasm
+- https://www.igorslab.de/en/inside-amd-bios-what-is-really-hidden-behind-agesa-the-psp-platform-security-processor-and-the-numbers-of-combo-pi/
+- https://github.com/tianocore/edk2/blob/master/MdePkg/Library/PeiCoreEntryPoint/PeiCoreEntryPoint.c
+- https://edk2-docs.gitbook.io/understanding-the-uefi-secure-boot-chain/
+- https://edk2-docs.gitbook.io/edk-ii-minimum-platform-specification/
+- https://github.com/orgs/tianocore-docs/repositories
+- https://github.com/tianocore/tianocore.github.io/wiki/EDK-II-Documents
+- https://opensecuritytraining.info/IntroBIOS.html
+- https://trustedcomputinggroup.org/resources/?
 -->
+
+
+The UEFI boot sequence consists of 6 stages.
+
+![](doc/images/boot_sequence.png)
+
+### 1. Security (SEC)
+
+<!-- 
+https://edk2-docs.gitbook.io/edk-ii-module-writer-s-guide/6_sec_module
+ -->
+
+The Security phase is the first code executed by the CPU, it is uncompressed and executed directly from flash. It consists of platform specific assembly.
+
+- Handles all platform restart events (power on, wakup from sleep, etc)
+- Creates a temporary memory state by configuring the CPU Cache as RAM (CAR) "no evictions mode"
+- Serves as the root of trust in the system
+- Passes handoff information to the Pre-EFI Initialization (PEI) Foundation
+
+
+Since the CPU doesn't know about UEFI or BIOS the initial step is exactly the same, it starts in 16-bit real mode and fetches it's first instruction from `CS = 0xF000` and `IP = 0xFFF0` but instead of shifting `CS` left by four bits and adding `IP`, the `CS` base register is initialized to `0xFFFF'0000`. So the first instruction is fetched from the physical address `0xFFFF'FFF0` (`0xFFFF'0000 + 0xFFF0`). The CS base address remains at this initial value until the CS selector register is loaded by software (e.g. far jump or call instruction)
+
+- Populates Reset Vector Data structure
+- Saves Built-in self-test (BIST) status
+- Enables protected mode (16 bit -> 32 bit)
+- Configures temporary RAM (not only limited in processor cache) by using MTRR to configure CAR.
+
+Passing of handoff information to the PEI phase:
+
+```C
+typedef VOID EFIAPI (*EFI_PEI_CORE_ENTRY_POINT)(IN CONST EFI_SEC_PEI_HAND_OFF *SecCoreData,
+                                                IN CONST EFI_PEI_PPI_DESCRIPTOR *PpiList);
+```
+
+SEC Core Data:
+- Points to a data structure containing information about the operating environment:
+- Location and size of the temporary RAM
+- Location of the stack (in temporary RAM)
+- Location of the Boot Firmware Volume (BFV)
+  
+PPI list:
+
+- Temporary RAM support PPI
+
+An optional service that moves temporary RAM contents to permanent RAM.
+
+- SEC platform information PPI
+
+An optional service that abstracts platform-specific information to locate the PEIM dispatch order and maximum stack capabilities.
+
+### 2. Pre-EFI Initialization (PEI)
+
+<!-- 
+- https://edk2-docs.gitbook.io/edk-ii-module-writer-s-guide/7_pre-efi_initialization_modules
+- https://uefi.org/sites/default/files/resources/PI_Spec_1_7_final_Jan_2019.pdf
+ -->
+
+Configures a system meeting the minimum prerequisites for the Driver Execution (DXE) phase, which is generally a linear array of RAM large enough for successful execution.
+
+PEI provides a framework allowing vendors to supply initialization modules for each functionally distinct piece of system hardware which must be initialized before the DXE phase.
+
+PEI design goals of the PI architecture:
+
+- Maintenance of the "chain of trust", includes protection and authorization of PEI modules
+- Provide a core PEI module
+- Independent developement of intialization modules
+
+The PEI phase consists of the PEI Foundation core and specialized plug-ins known as Pre-EFI Initialization Modules (PEIMs).
+
+Since the PEI phase is very early in the boot process it can't assume reasonable amounts of RAM so the features are limited:
+- Locating, validating and dispatching PEIMs
+- Communication between PEIMs
+- Providing Hand-Off Data for DXE phase
+- Initializing some permanent memory complement
+- Describing the memory in Hand-Off Blocks (HOBs)
+- Describing the firmware volume locations in HOBs
+- Passing control into the Driver Execution Environment (DXE) phase
+- Discover boot mode and possibly resume from sleep state
+
+![](doc/images/pei.png)
+
+#### PEI Services
+
+PEI Service Table visible to all PEIMs in the system, a pointer to this table is passed as an argument via the PEIM entry point, it is also part of each PEIM-to-PEIM Interface (PPI).
+
+
+| Service                  | Description                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| PPI Services             | Manages PPIs to facilitate intermodule calls between PEIMs. Interfaces are installed and tracked on a database maintained in temporary RAM. |
+| Boot Mode Services       | Manages the boot mode (S3, S5, normal boot, diagnostics, etc.) of the system                                                                |
+| HOB Services             | Creates data structures called Hand-Off Blocks (HOBs) that are used to pass information to the next phase of the PI Architecture.           |
+| Firmware Volume Services | Finds PEIMs and other firmware files in the firmware volumes                                                                                |
+| PEI Memory Services      | Provides a collection of memory management services for use both before and after permanent memory has been discovered                      |
+| Status Code Services     | Provides common progress and error code reporting services (for example, port 080h or a serial port for simple text output for debug).      |
+| Reset Services           | Provides a common means by which to initiate a warm or cold restart of the system.                                                          |
+
+#### PEI Foundation/Core
+
+PEI Foundation code is portable across all platforms of a given instruction-set. The set of exposed services is the same across different microarchitextures and allows PEIMs to be written in C.
+
+- Dispatches PEIMs
+- Maintains boot mode
+- Initializes permanent memory
+- Invokes DXE loader
+
+#### PEI Dispatcher
+
+The PEI Dispatcher evaluates dependencies of PEIMs in the firmware volume, these dependencies are PPIs. The Dispatcher holds internal state machines to check dependencies of PEIMs, it starts executing PEIMs whose dependencies are statisfied to build up dependencies of other PEIMs, this is done until the dispatcher cannot invoke any more PEIMs. Then the DXE Initial Program Loader (IPL) PPI is invoked to pass control to the DXE phase.
+
+#### Pre-EFI Initialization Modules (PEIMs)
+PEIMs are specialized drivers that personalize the PEI Foundation to the platform. They are analogus to DXE driver and generally correspond to the components being initialized. It is strongly recommended that PEIMS do only the minimum necessary work to initialize the system to a state that meets the prerequisites of the DXE phase. PEIMs reside in firmware volumes (FVs).
+
+#### PEIM-to-PEIM Interfaces (PPIs)
+PEIMs communicate with each other using a structure called PPI. A PPI is a GUID pointer pair. The GUID is used to identifiy a certain service and the pointer provides access to data structures and services of the PPI.
+
+There are two kinds of PPIs:
+- Architectural PPIs
+- Additional PPIs
+
+An architectural PPI is described in the PEI Core Interface Specification (CIS) and the GUID is known to the PEI Foundation. They typically provide a common interface to the PEI Foundation to a service with platform specific implementation.
+
+An additional PPI is important for interoperability but isn't required by the PEI Foundation, they can be classified as mandatory or optional.
+
+  
+### 3. Drive Execution Environment (DXE)
+
+<!-- 
+- https://edk2-docs.gitbook.io/edk-ii-module-writer-s-guide/8_dxe_drivers_non-uefi_drivers
+- Beyond BIOS: Developing with the Unified Extensible Firmware Interface, Third Edition
+ -->
+
+- DXE Foundation/Core
+- DXE Dispatcher
+- DXE Drivers
+
+#### DXE Foundation
+
+The DXE Foundation produces a set of Boot, Runtime and DXE Services and exposes them through handle databases in the EFI System Table. It is designed to be completely portable, independent of processor, chipset and platform. The only dependent of the Hand-Off Blocks from the PEI phase, after these are processed the all prior phases can be unloaded. 
+
+#### DXE Dispatcher
+
+The DXE Dispatcher discovers DXE drivers within the Firmware Volume (FV) and executes them in the correct order, respecting their dependencies towards each other. The Firmware Volume file format allows the DXE driver images to be packaged with expressions about their dependencies. Since the DXE Drivers are PE/COFF images the dispatcher comes with an apropriate loader to load and execute the image format.
+
+#### DXE Drivers
+
+- Drivers that execute very early in the DXE phase
+- Drivers that comply with the UEFI Driver Model
+
+The DXE Drivers are responsible for initializing the processor, chipset,
+and platform components as well as providing software abstractions for console and
+boot devices in the form of services.
+  
+### 4. Boot Device Selection (BDS)
+
+The DXE Foundation will hand control to the BDS Architectural Protocol after all of the DXE drivers whose dependencies have been satisfied have been loaded and executed by the DXE Dispatcher. 
+
+- Initializing console devices based on the ConIn, ConOut, and StdErr environment variables
+- Loading device drivers listed in the DriverOrder environment variables
+- Attempting to load and execute boot selections list from the BootOrder environment variables
+
+During the BDS phase new Firmware Volumes (FV) might be discovered and control is once again handed to the DXE Dispatcher to load drivers found on these additional volumes.
+
+### 5. Transient System Load (TSL)
+
+The Transient System Load (TSL) is primarily the OS vendor provided boot loader. Both the TSL and the Runtime Services (RT) phases may allow access to persistent content, via UEFI drivers and UEFI applications. Drivers in this category include PCI Option ROMs.
+
+This phase ends when an OS boot loader calls 'ExitBootServices()'.
+
+### 6. Runtime (RT)
+
+Boot service drivers have been unloaded and only runtime services are accessible.
+
+### 7. After Life (AL)
+
+The After Life (AL) phase consists of persistent UEFI drivers used for storing the state of the system during the OS orderly shutdown, sleep, hibernate or restart processes.
+
+<!-- 
+## Typical Flash Part Layout
+- https://edk2-docs.gitbook.io/edk-ii-build-specification/2_design_discussion/24_typical_flash_part_layout
+- https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi-wsmt#:~:text=The%20Windows%20SMM%20Security%20Mitigation%20Table%20(WSMT)%20is%20an%20ACPI,Management%20Mode%20(SMM)%20software.
+ -->
+
+## Secure Boot
+
+<!-- 
+- https://edk2-docs.gitbook.io/understanding-the-uefi-secure-boot-chain/
+- http://theory.stanford.edu/~ninghui/courses/Fall03/papers/clark_wilson.pdf
+ -->
+
+Secure boot ses a set of policy objects to verify the next entity before execution.
+Trusted boot does not verify the next entity, it only records the digest of the next boot entity to a trusted ocation, such as a Platform Configuration Register (PCR) in the Trusted Platform Module (TPM). This allows a trusted boot chain to be verified later in the boot process.
+
+<!--
+- UEFI variables SMM handler
+- protected range registers
+-->
+
+### Trusted Platform Module (TPM)
+
+<!-- 
+- https://en.wikipedia.org/wiki/Trusted_Platform_Module
+- https://resources.infosecinstitute.com/topic/uefi-and-tpm-2/
+- https://trustedcomputinggroup.org/resource/tpm-library-specification/
+- https://trustedcomputinggroup.org/wp-content/uploads/TCG_ACPIGeneralSpecification-Family-1.2-and-2.0-Ver1.2-Rev8_public-revie....pdf
+ -->
+
+Trusted Platform Module (TPM) is a standard for a secure crypto library implementation (often a separate microcontoller) designed to secure hardware through integrated cryptographic keys. 
+
+
+It is used for:
+
+- Platform integrity (e.g. UEFI Secure Boot)
+- Disk encryption (e.g. Bitlocker)
+- Digital Rights Management (DRM)
+
+![TPM Block Diagram (Zimmer, Dasari, & Brogan, 2009)](doc/images/tpm_compliant_module.jpg)
 
 # Current Research
 
@@ -307,4 +534,5 @@ That's it!
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/34_handle_database
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/readme.8
 - https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/appendix_b_edk_ii_sample_drivers
+- https://edk2-docs.gitbook.io/edk-ii-uefi-driver-writer-s-guide/3_foundation/readme.15/31510_boot_manager_driver_list_processing
 -->
